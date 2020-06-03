@@ -2,6 +2,7 @@ import threading
 import time
 import pyautogui
 import keyboard
+import configparser
 
 
 def __ghost_form_thread_function(player_cooldown):
@@ -43,9 +44,18 @@ def spam_ghost_form():
         time.sleep(.1)
 
 
+
+
+
+def smart_cooldown_spammer():
+    config = configparser.ConfigParser()
+    config.read('PlayerConfig.ini')
+    player_cooldown = float(config['DEFAULT']['PlayerCooldown'])
+    slot_one_cooldown = int(config['DEFAULT']['Slot1Cooldown'])
+    slot_two_cooldown = int(config['DEFAULT']['Slot2Cooldown'])
+    slot_three_cooldown = int(config['DEFAULT']['Slot3Cooldown'])
+
+
 if __name__ == '__main__':
-    player_cooldown_percent = 1 - (int(input('Enter your total cooldown percentage as a whole number (be nice or it '
-                                             'will crash, not validating this): ')) / 100)
-    print('Registering hotkey for ghost form on f6')
-    keyboard.add_hotkey('f6', constant_ghost_form, args=[player_cooldown_percent])
+    keyboard.add_hotkey('f6', smart_cooldown_spammer)
     keyboard.wait()
