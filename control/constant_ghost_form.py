@@ -34,7 +34,7 @@ def duplicate_item_thread_func(player_cooldown, slot_cooldown, keys):
         pyautogui.keyUp(keys[current_index])
         time.sleep((slot_cooldown * cooldown_adjustment) / len(keys))
         current_index += 1
-        if current_index > len(keys):
+        if current_index == len(keys):
             current_index = 0
 
 
@@ -62,7 +62,7 @@ def smart_cooldown_spammer():
                 keys.append('2')
             if slot_one_item == slot_three_item:
                 keys.append('3')
-            dst = threading.Thread(target=duplicate_item_thread_func, args=[player_cooldown, slot_one_cooldown, '1'])
+            dst = threading.Thread(target=duplicate_item_thread_func, args=[player_cooldown, slot_one_cooldown, keys])
             threads.append(dst)
         if slot_two_item != slot_one_item:
             s2t = threading.Thread(target=slot_thread_func, args=[player_cooldown, slot_two_cooldown, '2'])
