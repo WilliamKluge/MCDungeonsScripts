@@ -24,12 +24,23 @@ def __ghost_form_speed_thread_function(player_cooldown):
 
 
 def constant_ghost_form(player_cooldown):
-    ghost_thread = threading.Thread(target=__ghost_form_thread_function, args=[player_cooldown])
-    speed_thread = threading.Thread(target=__ghost_form_speed_thread_function, args=[player_cooldown])
+    ghost_thread = threading.Thread(target=__ghost_form_thread_function, args=[player_cooldown-.015])
+    speed_thread = threading.Thread(target=__ghost_form_speed_thread_function, args=[player_cooldown-.015])
     ghost_thread.start()
     speed_thread.start()
     ghost_thread.join()
     speed_thread.join()
+
+
+def spam_ghost_form():
+    while not keyboard.is_pressed('f7'):
+        pyautogui.keyDown('1')
+        pyautogui.keyUp('1')
+        pyautogui.keyDown('2')
+        pyautogui.keyUp('2')
+        pyautogui.keyDown('3')
+        pyautogui.keyUp('3')
+        time.sleep(.1)
 
 
 if __name__ == '__main__':
