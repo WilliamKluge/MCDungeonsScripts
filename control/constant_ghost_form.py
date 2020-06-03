@@ -5,57 +5,56 @@ import keyboard
 import configparser
 
 
-def __ghost_form_thread_function(player_cooldown):
-    ghost_cloak_cooldown = 6
+stop_threads = False
+
+
+def stop_threads_func():
+    global stop_threads
     while not keyboard.is_pressed('f7'):
-        pyautogui.keyDown('1')
-        pyautogui.keyUp('1')
-        time.sleep((ghost_cloak_cooldown*player_cooldown)/2)
-        pyautogui.keyDown('2')
-        pyautogui.keyUp('2')
-        time.sleep((ghost_cloak_cooldown*player_cooldown)/2)
+        time.sleep(0.01)
+    print('Setting the stop thread variable to true')
+    stop_threads = True
 
 
-def __ghost_form_speed_thread_function(player_cooldown):
-    boots_cooldown = 5
-    while not keyboard.is_pressed('f7'):
-        pyautogui.keyDown('3')
-        pyautogui.keyUp('3')
-        time.sleep((boots_cooldown*player_cooldown))
-
-
-def constant_ghost_form(player_cooldown):
-    ghost_thread = threading.Thread(target=__ghost_form_thread_function, args=[player_cooldown-.015])
-    speed_thread = threading.Thread(target=__ghost_form_speed_thread_function, args=[player_cooldown-.015])
-    ghost_thread.start()
-    speed_thread.start()
-    ghost_thread.join()
-    speed_thread.join()
-
-
-def spam_ghost_form():
-    while not keyboard.is_pressed('f7'):
-        pyautogui.keyDown('1')
-        pyautogui.keyUp('1')
-        pyautogui.keyDown('2')
-        pyautogui.keyUp('2')
-        pyautogui.keyDown('3')
-        pyautogui.keyUp('3')
-        time.sleep(.1)
-
-
-
+def slot_thread_func(player_cooldown, slot_cooldown, key):
+    global stop_threads
+    cooldown_adjustment = 1 - player_cooldown
+    while not stop_threads:
+        pyautogui.keyDown(key)
+        pyautogui.keyUp(key)
+        time.sleep(slot_cooldown * cooldown_adjustment)
 
 
 def smart_cooldown_spammer():
-    config = configparser.ConfigParser()
-    config.read('PlayerConfig.ini')
-    player_cooldown = float(config['DEFAULT']['PlayerCooldown'])
-    slot_one_cooldown = int(config['DEFAULT']['Slot1Cooldown'])
-    slot_two_cooldown = int(config['DEFAULT']['Slot2Cooldown'])
-    slot_three_cooldown = int(config['DEFAULT']['Slot3Cooldown'])
+    global stop_threads
+    print('Reading values from PlayerConfig.ini')
+    stop_threads = False
+    try:
+        config = configparser.ConfigParser()
+        config.read('PlayerConfig.ini')
+        player_cooldown = float(config['DEFAULT']['PlayerCooldown']) + float(config['DEFAULT']['AdditionalReduction'])
+        slot_one_cooldown = int(config['DEFAULT']['Slot1Cooldown'])
+        slot_two_cooldown = int(config['DEFAULT']['Slot2Cooldown'])
+        slot_three_cooldown = int(config['DEFAULT']['Slot3Cooldown'])
+        s1t = threading.Thread(target=slot_thread_func, args=[player_cooldown, slot_one_cooldown, '1'])
+        s2t = threading.Thread(target=slot_thread_func, args=[player_cooldown, slot_two_cooldown, '2'])
+        s3t = threading.Thread(target=slot_thread_func, args=[player_cooldown, slot_three_cooldown, '3'])
+        stop_threads_thread = threading.Thread(target=stop_threads_func)
+        s1t.start()
+        s2t.start()
+        s3t.start()
+        stop_threads_thread.start()
+        s1t.join()
+        s2t.join()
+        s3t.join()
+        stop_threads_thread.join()
+        print('Threads joined - hotkey ready')
+    except:
+        print('Do you have the PlayerConfig.ini in the same directory as the exe?')
 
 
 if __name__ == '__main__':
+    print('Setting cooldown hotkey to F6')
+    print('Press F7 to stop')
     keyboard.add_hotkey('f6', smart_cooldown_spammer)
     keyboard.wait()
